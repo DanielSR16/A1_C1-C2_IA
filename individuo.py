@@ -7,6 +7,9 @@ edades = []
 tipoActividades = []
 alimentos = []
 
+
+
+
 with open('datos_A1_C1-C2.csv', newline='') as File:  
     reader = csv.reader(File)
     for row in reader:
@@ -17,43 +20,24 @@ with open('datos_A1_C1-C2.csv', newline='') as File:
         tipoActividades.append(row[4])
         new_alimentos = row[5].replace(' ','').replace('"','') 
         alimentos.append(new_alimentos+',')
+        
 
 class Individuo():
     def __init__(self):
-        self.caloriasMaxConsumir_1 =  0
-
-        self.genero = ''
-        self.tipoActividad = ''
-
-        self.alimentosDieta = {}
         self.alimentosConsumir = {}
 
+        self.alimentosDieta = []
+        self.alimentosDieta_valor = []
+        
         self.i_caloriasDieta = 0
         self.fenotipo = 0
         self.aptitud = 0
         
 
-    def caloriasConsumirIndividuo(self,listAlimentos):
-        valor = random.randint(0,24)
-        individual_genero = generos[valor]
-        individual_peso = pesos[valor]
-        individual_estatura = estaturas[valor]
-        individual_edad = edades[valor]
-        individual_tipoActicvidad = tipoActividades[valor]
-        individual_alimentos = alimentos[valor]
-        # print('peso',individual_peso)
-        # print('estatuta',individual_estatura)
-        # print('edad',individual_edad)
-        # print('actividad',individual_tipoActicvidad)
-        # print(individual_tipoActicvidad)
     
-        self.caloriasMaxConsumir_1 =round(calcularCalorias(individual_genero,individual_peso,individual_estatura,individual_edad,individual_tipoActicvidad))
-        
-        self.genero = individual_genero
-        self.tipoActividad = individual_tipoActicvidad
-        self.alimentos(listAlimentos,individual_alimentos)
 
     def alimentos(self,listAlimentos,individual_alimentos):
+      
         #lista de nombres de los alimentos que puede cosumir
         nombreAlimentosConsumir = []
         #alimentos que se eliminaran de la lista general
@@ -71,36 +55,45 @@ class Individuo():
         for i in range(0,9):
             #se selecciona un nombre al azar de alimento
             cantidad =  random.randint(100,300)
-            seleccionAlimentos = random.randint(0,len(nombreAlimentosConsumir))
+            seleccionAlimentos = random.randint(0,len(nombreAlimentosConsumir)-1)
             #se saca el valor del alimento al azar
+
             valorDelAlimento = self.alimentosConsumir[nombreAlimentosConsumir[seleccionAlimentos]]
             #se guarda el alimento dentro de la dieta 
             cantidadCaolorias = (valorDelAlimento * cantidad) / 100
-            self.alimentosDieta[nombreAlimentosConsumir[seleccionAlimentos]] = cantidadCaolorias
-
+            # self.alimentosDieta[nombreAlimentosConsumir[seleccionAlimentos]] = cantidadCaolorias
+            self.alimentosDieta.append(nombreAlimentosConsumir[seleccionAlimentos])
+            self.alimentosDieta_valor.append(cantidadCaolorias)
             self.i_caloriasDieta = self.i_caloriasDieta + cantidadCaolorias
-        # print('valor del alimento',valorDelAlimento)
-        # print('primero',nombreAlimentosConsumir[0])
+        
+        
 
 
 
-    def completarIndividuo(self):
-        sumador = 0
-        for valores in self.alimentosDietaValor:
-            sumador = sumador + valores
-        self.i_caloriasDieta = sumador
+    def completarIndividuo(self,caloriasMaximas):
+        self.fenotipo = caloriasMaximas - self.i_caloriasDieta
 
-        self.fenotipo = self.caloriasMaxConsumir_1 - self.i_caloriasDieta
+        self.aptitud = (self.fenotipo * 1000) / 15000
 
 
 
+    def individuo_cruzado(self,listaNombres_datos,listavalores_datos):
+        self.alimentosDieta = listaNombres_datos
+        self.alimentosDieta_valor = listavalores_datos
+        # print(self.alimentosDieta_valor)
+        self.i_caloriasDieta = sum(self.alimentosDieta_valor)
+        
+
+    def indiduo_cruz_complementar(self,maximoConsumir):
+        self.i_caloriasDieta = sum(self.alimentosDieta_valor)
+        self.i_caloriasDieta
 
 
     def toString(self):
-        return  f'calorias: {self.alimentosDieta}\n'+f'total: {self.i_caloriasDieta}\n'+f'Maximo Consumir:{self.caloriasMaxConsumir_1}\n' 
+        return  f'alimentos: {self.alimentosDieta}\n'+f'alimentos_valores: {self.alimentosDieta_valor}\n'+f'i calorias: {self.i_caloriasDieta}\n'+f'fenotipo: {self.fenotipo}\n'+f'Aptitud: {self.aptitud}'  
 
 
-
+    
 def calcularFactorActividad(actividad):
   
     if actividad == 'activo':
@@ -114,7 +107,7 @@ def calcularFactorActividad(actividad):
 def calcularCalorias(genero,peso,estatura,edad,actividad):
     if genero == 'Mujer':
         print('mujer')
-        CaloriasConsumir = ((655 + (9.6 * peso)) + ((1.8 * estatura ) - ( 4.7 * edad) )) * calcularFactorActividad(actividad)
+        CaloriasConsumir = ((655 + (9.6 * peso)) + ((1.8 * estatura ) - ( 4.7 * edad))) * calcularFactorActividad(actividad)
     elif genero == 'Hombre':
         print('hombre')
         CaloriasConsumir = ((66 + (13.7 * peso)) + ((5 * estatura ) - ( 6.8 * edad))) * calcularFactorActividad(actividad)
