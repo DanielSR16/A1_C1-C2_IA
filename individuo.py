@@ -37,10 +37,12 @@ class Individuo():
     
 
     def alimentos(self,listAlimentos,individual_alimentos):
-      
+        alimentosEliminar = []
         #lista de nombres de los alimentos que puede cosumir
         nombreAlimentosConsumir = []
         #alimentos que se eliminaran de la lista general
+        print(individual_alimentos)
+        
         alimentosEliminar = separarAlimentosNoConsumir(individual_alimentos)
         # print(alimentosEliminar)
         # aqui se eliminaran omitiran los alimentos que al individuo no le gustan, mientras de False podra ingresar a los alimentos a consumir
@@ -49,6 +51,7 @@ class Individuo():
             if eliminar == False:
                 self.alimentosConsumir[alimentos[0]] = alimentos[1]
         #llenado de lista de nombres de alimentos a consumir
+        
         for alimentoConsumir in self.alimentosConsumir.items():
            nombreAlimentosConsumir.append(alimentoConsumir[0])
 
@@ -87,6 +90,11 @@ class Individuo():
     def indiduo_cruz_complementar(self,maximoConsumir):
         self.i_caloriasDieta = sum(self.alimentosDieta_valor)
         self.i_caloriasDieta
+
+    def individuo_mutacion_completar(self,maxiConsumir):
+        self.i_caloriasDieta = sum(self.alimentosDieta_valor)
+        self.fenotipo = maxiConsumir - self.i_caloriasDieta
+        self.aptitud = (self.fenotipo * 1000) / 15000
 
 
     def toString(self):
