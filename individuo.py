@@ -41,9 +41,9 @@ class Individuo():
         #lista de nombres de los alimentos que puede cosumir
         nombreAlimentosConsumir = []
         #alimentos que se eliminaran de la lista general
-        print(individual_alimentos)
-        
+  
         alimentosEliminar = separarAlimentosNoConsumir(individual_alimentos)
+        # print('Alimentos eliminar: ',alimentosEliminar)
         # print(alimentosEliminar)
         # aqui se eliminaran omitiran los alimentos que al individuo no le gustan, mientras de False podra ingresar a los alimentos a consumir
         for alimentos in listAlimentos.items():

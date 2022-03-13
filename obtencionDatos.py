@@ -44,7 +44,7 @@ with open('datos_A1_C1-C2.csv', newline='') as File:
         alimentos.append(new_alimentos+',')
 
 
-valor = random.randint(0,24)
+valor = 24
 individual_genero = generos[valor]
 individual_peso = pesos[valor]
 individual_estatura = estaturas[valor]
@@ -193,7 +193,18 @@ def cruza():
         
 
 
-
+def eliminar_letra(dato_eliminar):
+    listaPosiciones_eliminar = []
+    for i in lista_letras_individuos:
+        if i == dato_eliminar:
+            listaPosiciones_eliminar.append(i)
+    print('lista Valores: ',listaPosiciones_eliminar)
+    if len(listaPosiciones_eliminar) >0:
+        for borrar in listaPosiciones_eliminar:
+                lista_letras_individuos.remove(borrar)
+           
+    listaPosiciones_eliminar = []
+            
 
 def mutacion():
     
@@ -235,19 +246,30 @@ def mutacion():
             
    
     if len(listaEliminar) > 0:
-        
-        for  nombre in listaEliminar:
-     
-            listaTotalIndividuos.pop(nombre)
+        print('lista elimanr: ',listaEliminar)
+        for  nombre_eliminar1 in listaEliminar:
+            print('valor eliminar: ',nombre_eliminar1)
+            print('Total Nombre : ',lista_letras_individuos)
+            listaTotalIndividuos.pop(nombre_eliminar1)
             
 
 
-            lista_letras_individuos.remove(nombre)
-            segundaVeS = nombre in lista_letras_individuos
-            if segundaVeS == True:
-                lista_letras_individuos.remove(nombre)
+            # lista_letras_individuos.remove(nombre)
+            # segundaVeS = nombre in lista_letras_individuos
+            # if segundaVeS == True:
+            #     lista_letras_individuos.remove(nombre)
 
-            print(lista_letras_individuos)
+            # del lista_letras_individuos[lista_letras_individuos.index(nombre_eliminar1)] 
+            # repetido = nombre_eliminar1 in lista_letras_individuos
+         
+            # if repetido == True:
+            #     del lista_letras_individuos[lista_letras_individuos.index(nombre_eliminar1)] 
+            # lista_letras_individuos.remove(nombre)
+
+            eliminar_letra(nombre_eliminar1)
+            print('Total Nombre Despues: ',lista_letras_individuos)
+
+            
 
     
 
@@ -270,18 +292,19 @@ def poda():
         contador = contador + 1
     
     if len(peoresAptitudes) > 0:
-        for nombre in peoresAptitudes:
-            listaTotalIndividuos.pop(nombre)
+        for nombre_eliminar2 in peoresAptitudes:
+            listaTotalIndividuos.pop(nombre_eliminar2)
             # for a in range(len(lista_letras_individuos)-1):
             #     if lista_letras_individuos[a] == nombre:
             #         lista_letras_individuos.pop(a)
-            del lista_letras_individuos[lista_letras_individuos.index(nombre)] 
-            repetido = nombre in lista_letras_individuos
+            # del lista_letras_individuos[lista_letras_individuos.index(nombre)] 
+            # repetido = nombre in lista_letras_individuos
          
-            if repetido == True:
-                del lista_letras_individuos[lista_letras_individuos.index(nombre)] 
+            # if repetido == True:
+            #     del lista_letras_individuos[lista_letras_individuos.index(nombre)] 
             # lista_letras_individuos.remove(nombre)
-            print(' se elimino =  :',name)    
+            eliminar_letra(nombre_eliminar2)
+            
 
 
 
