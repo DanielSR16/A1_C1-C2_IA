@@ -68,13 +68,11 @@ class Dialogo(QMainWindow):
 
     def __init__(self):
         QMainWindow.__init__(self)
-        self.ui = Ui_Dialog()
+        self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.ui.tableAlimentos.setColumnWidth(0, 400)
-        self.ui.botonMostrar.clicked.connect(self.getItems)
+        self.datosTablas()
 
-        # self.ui.botonAceptar.clicked.connect()
-
+     
     def getItems(self):
 
         generos_m = generos
@@ -116,6 +114,111 @@ class Dialogo(QMainWindow):
                 a2 = QTableWidgetItem(i)
                 self.ui.tableAlimentos.setItem(row, 0, a2)
                 row += 1
+
+    def datosTablas(self):
+        listaTotal = []
+        resultadoMain = main()
+        self.ui.tabla_dieta.setRowCount(60)
+        self.ui.tabla_dieta.setColumnCount(11)
+        alimento = []
+        cantidad = []
+        for i in range(30):
+            alimento.append(resultadoMain[0][i].alimentosDieta)
+            cantidad.append(resultadoMain[0][i].alimentosDieta_cantidad)
+          
+      
+        
+        listaDatosColumna = []
+        listaAux = []
+        contador = 0
+        for x in range(9):
+
+            for y in range(30):
+                listaAux.append(alimento[y][contador])
+                listaAux.append(cantidad[y][contador])
+            contador = contador +1 
+            listaDatosColumna.append(listaAux)
+            listaAux = []
+
+        listaDias = []
+        for dias in range(30):
+            dia = 'Dia: ' + str(dias+1)
+            listaDias.append(dia)
+            listaDias.append("")
+
+        listaDatosColumna.append(listaDias)
+
+        lista_total_Calorias = []
+        for c in range(30):
+           lista_total_Calorias.append( round(resultadoMain[0][c].i_caloriasDieta,4))
+           lista_total_Calorias.append( "")
+
+        listaDatosColumna.append(lista_total_Calorias)
+
+        row = 0
+        colum = 0
+        
+        for a in listaDatosColumna:
+            if colum < 9:
+                name_horizontal = QTableWidgetItem('Dieta')
+                self.ui.tabla_dieta.setHorizontalHeaderItem(colum,name_horizontal)
+            elif colum == 9:
+                name_horizontal = QTableWidgetItem('Fechas')
+                self.ui.tabla_dieta.setHorizontalHeaderItem(colum,name_horizontal)
+            elif colum == 10:
+                name_horizontal = QTableWidgetItem('Calorias')
+                self.ui.tabla_dieta.setHorizontalHeaderItem(colum,name_horizontal)
+            for datos in a:
+               
+                # self.ui.tabla_dieta.setRowCount(row+1)
+                a2 = QTableWidgetItem(str(datos))
+                
+
+                self.ui.tabla_dieta.setItem(row, colum, a2)
+                if row % 2 == 0:
+                    name = QTableWidgetItem('Alimentos')
+                    
+                else:
+                    name = QTableWidgetItem('Cantidad')
+                self.ui.tabla_dieta.setVerticalHeaderItem(row,name)
+                row += 1
+            colum += 1
+            row = 0
+        #Datos Tabla usuario
+
+        lista_datos_usuario = []
+
+        lista_datos_usuario.append('Genero: '+individual_genero)
+        lista_datos_usuario.append('Peso: '+str(individual_peso))
+        lista_datos_usuario.append('Estatura: '+str(individual_estatura))
+        lista_datos_usuario.append('Edad: '+str(individual_edad))
+        lista_datos_usuario.append('tipoActividad: '+individual_tipoActicvidad)
+        lista_datos_usuario.append('Kg Bajar/mes: '+str(round(resultadoMain[1],4)))
+        lista_datos_usuario.append('Calorias reducidad/mes: '+str(round(resultadoMain[2],4)))
+
+        print(lista_datos_usuario)
+        self.ui.tabla_datos.setRowCount(7)
+        self.ui.tabla_datos.setColumnCount(1)
+        row = 0
+        name_horizontal = QTableWidgetItem('Datos Persona')
+        self.ui.tabla_datos.setHorizontalHeaderItem(0,name_horizontal)
+        for i in lista_datos_usuario:
+            self.ui.tabla_datos.setRowCount(row+1)
+            a2 = QTableWidgetItem(i)
+            self.ui.tabla_datos.setItem(row, 0, a2)
+            row += 1
+
+
+
+            
+
+            
+
+            
+
+
+        
+
 
 
 # print(individual_alimentos)
@@ -412,18 +515,16 @@ def main():
 
     print('Total a bajar:', Suma_total_pesos)
     print("Total de calorias reducidas", suma_total_calorias_reducir)
+    listIndividuosFinales = []
+    for valor in individuos_finales_ordenados.items(): 
+        listIndividuosFinales.append(valor[1])
 
-main()
-datos = []
-contador = 0
-for valor in individuos_finales_ordenados.items():
-    if contador < 9:
-        datos.append(valor[1].alimentosDieta)
-        datos.append(valor[1].alimentosDieta_cantidad)
-    contador = contador + 1
+    return listIndividuosFinales,Suma_total_pesos,suma_total_calorias_reducir
 
 
-# app = QApplication(sys.argv)
-# dialogo = Dialogo()
-# dialogo.show()
-# sys.exit(app.exec())
+def a():
+  print('holis ')
+app = QApplication(sys.argv)
+dialogo = Dialogo()
+dialogo.show()
+sys.exit(app.exec())

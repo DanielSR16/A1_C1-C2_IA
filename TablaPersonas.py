@@ -54,7 +54,7 @@ class Dialogo(QMainWindow):
 			row= 0
 			for i in alimen:
 				self.ui.tableAlimentos.setRowCount(row+1)
-				a2= QTableWidgetItem(i)
+				a2= QTableWidgetItem('a')
 				self.ui.tableAlimentos.setItem(row,0,a2)
 				row +=1 
 						
