@@ -6,6 +6,17 @@ from alimentos import alimentos as alimentosTotal
 from individuo import Individuo
 import string
 import operator
+import pandas as pd
+import matplotlib.pyplot as plt
+import sys
+import PySide6
+from PySide6.QtCore import *
+from PySide6.QtGui import *
+from PySide6.QtWidgets import *
+from matplotlib import widgets
+from tabla_view import Ui_MainWindow
+from view import Ui_Dialog
+
 
 generos = []
 pesos = []
@@ -17,10 +28,10 @@ alimentos = []
 letras = string.ascii_lowercase
 
 
-poblacionInicial = 7
-generaciones = 5 
+poblacionInicial = 10
+generaciones = 5
 probabilidadMutacion = 0.09
-probabilidadMutacionGen = 0.7
+probabilidadMutacionGen = 0.9
 poblacionMaxima = 30
 
 
@@ -30,9 +41,10 @@ lista_letras_individuos = []
 lista_alimentos_mutacion = []
 lista_alimentos_mutacion_valores = []
 
+individuos_finales_ordenados = {}
 
 
-with open('datos_A1_C1-C2.csv', newline='') as File:  
+with open('datos_A1_C1-C2.csv', newline='') as File:
     reader = csv.reader(File)
     for row in reader:
         generos.append(row[0])
@@ -40,22 +52,77 @@ with open('datos_A1_C1-C2.csv', newline='') as File:
         estaturas.append(int(row[2]))
         edades.append(int(row[3]))
         tipoActividades.append(row[4])
-        new_alimentos = row[5].replace(' ','').replace('"','') 
-        alimentos.append(new_alimentos+',')
+        new_alimentos = row[5].replace(' ', '').replace('"', '')
+        alimentos.append(new_alimentos)
 
-
-valor = 24
+valor = random.randint(0, 24)
 individual_genero = generos[valor]
 individual_peso = pesos[valor]
 individual_estatura = estaturas[valor]
 individual_edad = edades[valor]
 individual_tipoActicvidad = tipoActividades[valor]
-individual_alimentos = alimentos[valor]
+individual_alimentos = alimentos[valor] + ','
+
+
+class Dialogo(QMainWindow):
+
+    def __init__(self):
+        QMainWindow.__init__(self)
+        self.ui = Ui_Dialog()
+        self.ui.setupUi(self)
+        self.ui.tableAlimentos.setColumnWidth(0, 400)
+        self.ui.botonMostrar.clicked.connect(self.getItems)
+
+        # self.ui.botonAceptar.clicked.connect()
+
+    def getItems(self):
+
+        generos_m = generos
+        pesos_m = pesos
+        estaturas_m = estaturas
+        edades_m = edades
+        tipoActividades_m = tipoActividades
+        alimentos_m = alimentos
+
+        index = self.ui.personas.currentIndex().row()
+
+        self.ui.labelGenero.setText(generos_m[index])
+        self.ui.labelPeso.setText(f'{pesos_m[index]}')
+        self.ui.labelEstatura.setText(f'{estaturas_m[index]}')
+        self.ui.labelEdad.setText(f'{edades_m[index]}')
+        self.ui.labelAF.setText(tipoActividades_m[index])
+
+        if alimentos_m[index] == 'Todo':
+            self.ui.tableAlimentos.clearContents()
+            self.ui.tableAlimentos.setRowCount(1)
+            a2 = QTableWidgetItem('Le gustan todos los alimentos')
+            self.ui.tableAlimentos.setItem(0, 0, a2)
+
+        else:
+            
+            alimen = alimentos_m[index].split()
+            dato = str(alimentos_m[index])
+            lista_new = dato.split(',')
+   
+            self.ui.tableAlimentos.setRowCount(len(lista_new))
+            self.ui.tableAlimentos.clearContents()
+
+            # for i in range(len(lista_new)):
+            #     alimen[i].replace(',', '')
+
+            row = 0
+            for i in lista_new:
+                self.ui.tableAlimentos.setRowCount(row+1)
+                a2 = QTableWidgetItem(i)
+                self.ui.tableAlimentos.setItem(row, 0, a2)
+                row += 1
+
+
 # print(individual_alimentos)
 
 
 def calcularFactorActividad(actividad):
-  
+
     if actividad == 'activo':
         factorActividad = 1.725
     elif actividad == 'medio activo':
@@ -64,31 +131,34 @@ def calcularFactorActividad(actividad):
         factorActividad = 1.2
     return factorActividad
 
-def calcularCalorias(genero,peso,estatura,edad,actividad):
+
+def calcularCalorias(genero, peso, estatura, edad, actividad):
     if genero == 'Mujer':
         print('mujer')
         print(valor)
-        CaloriasConsumir = ((655 + (9.6 * peso)) + ((1.8 * estatura ) - ( 4.7 * edad))) * calcularFactorActividad(actividad)
+        CaloriasConsumir = ((655 + (9.6 * peso)) + ((1.8 * estatura) -
+                            (4.7 * edad))) * calcularFactorActividad(actividad)
         print(CaloriasConsumir)
     elif genero == 'Hombre':
         print('hombre')
         print(valor)
-        CaloriasConsumir = ((66 + (13.7 * peso)) + ((5 * estatura ) - ( 6.8 * edad))) * calcularFactorActividad(actividad)
+        CaloriasConsumir = ((66 + (13.7 * peso)) + ((5 * estatura) -
+                            (6.8 * edad))) * calcularFactorActividad(actividad)
     return CaloriasConsumir
-        
-caloriasMaximasConsumir = calcularCalorias(individual_genero,individual_peso,individual_estatura,individual_edad,individual_tipoActicvidad)
+
+
+caloriasMaximasConsumir = calcularCalorias(
+    individual_genero, individual_peso, individual_estatura, individual_edad, individual_tipoActicvidad)
 listaCaloriasDieta = []
 conta = 0
-
-
 
 
 def primerosIndividuos():
     contador = 0
     while(contador < poblacionInicial):
-        
+
         dato = Individuo()
-        dato.alimentos(alimentosTotal,individual_alimentos)
+        dato.alimentos(alimentosTotal, individual_alimentos)
         dato.completarIndividuo(caloriasMaximasConsumir)
 
         if dato.i_caloriasDieta < caloriasMaximasConsumir:
@@ -97,7 +167,7 @@ def primerosIndividuos():
                     lista_letras_individuos.append(letras[contador])
 
                     listaTotalIndividuos[letras[contador]] = dato
-                    
+
                     contador = contador + 1
             elif individual_genero == 'Hombre':
 
@@ -105,22 +175,17 @@ def primerosIndividuos():
                     lista_letras_individuos.append(letras[contador])
 
                     listaTotalIndividuos[letras[contador]] = dato
-                    
+
                     contador = contador + 1
-
-            
-
-    
-  
 
 
 def cruza():
     aux_letras = []
     aux_letras.extend(lista_letras_individuos)
-   
+
     while (len(aux_letras) > 0):
-        #se obtiene primer individuo a cruzar
-  
+        # se obtiene primer individuo a cruzar
+
         primerRandom = random.choice(aux_letras)
         aux_letras.pop(aux_letras.index(primerRandom))
         # se obtiene segundo individuo a cruza
@@ -129,57 +194,67 @@ def cruza():
         if(len(aux_letras) == 1):
             primerRandom = random.choice(aux_letras)
             aux_letras.pop(aux_letras.index(primerRandom))
-            segundoRandom =  primerRandom
+            segundoRandom = primerRandom
         # print(primerRandom)
         # print(segundoRandom)
         # print(lista_letras_individuos)
 
-        #punto donde se cruzaran los valores
-        puntoCruza = random.randint(1,9-1)
-        #individuo 1, obtencion de datos
+        # punto donde se cruzaran los valores
+        puntoCruza = random.randint(1, 9-1)
+        # individuo 1, obtencion de datos
         # print(listaTotalIndividuos.keys())
         # print('Primer Random')
         # print(primerRandom)
         individuo_cruzar_1_nombres = listaTotalIndividuos[primerRandom].alimentosDieta
         individuo_cruzar_1_numeros = listaTotalIndividuos[primerRandom].alimentosDieta_valor
-        #individuo 2, obtencion de datos
+        individuo_cruzar_1_cantidad = listaTotalIndividuos[primerRandom].alimentosDieta_cantidad
+        # individuo 2, obtencion de datos
         # print(individuo_cruzar_1_nombres)
         # print('Segundo Random')
         # print(segundoRandom)
         individuo_cruzar_2_nombres = listaTotalIndividuos[segundoRandom].alimentosDieta
         individuo_cruzar_2_numeros = listaTotalIndividuos[segundoRandom].alimentosDieta_valor
-   
-        #guardado de valor a intercambiar del individuo 1
+        individuo_cruzar_2_cantidad = listaTotalIndividuos[segundoRandom].alimentosDieta_cantidad
+
+        # guardado de valor a intercambiar del individuo 1
         guardar_cruza_1_nombres = individuo_cruzar_1_nombres[puntoCruza:9]
         guardar_cruza_1_numeros = individuo_cruzar_1_numeros[puntoCruza:9]
+        guardar_cruza_1_cantidad = individuo_cruzar_1_cantidad[puntoCruza:9]
 
-        #guardado de valor a intercambiar del individuo 2
+        # guardado de valor a intercambiar del individuo 2
         guardar_cruza_2_nombres = individuo_cruzar_2_nombres[puntoCruza:9]
         guardar_cruza_2_numeros = individuo_cruzar_2_numeros[puntoCruza:9]
+        guardar_cruza_2_cantidad = individuo_cruzar_2_cantidad[puntoCruza:9]
 
-        #valores que se mantendran del individuo 1
-        valor_mantiene_1_nombres =  individuo_cruzar_1_nombres[0:puntoCruza]
-        valor_mantiene_1_numeros =  individuo_cruzar_1_numeros[0:puntoCruza]
+        # valores que se mantendran del individuo 1
+        valor_mantiene_1_nombres = individuo_cruzar_1_nombres[0:puntoCruza]
+        valor_mantiene_1_numeros = individuo_cruzar_1_numeros[0:puntoCruza]
+        valor_mantiene_1_cantidad = individuo_cruzar_1_cantidad[0:puntoCruza]
         # valores que se mantendran del individuo 2
-        valor_mantiene_2_nombres =  individuo_cruzar_2_nombres[0:puntoCruza]
-        valor_mantiene_2_numeros =  individuo_cruzar_2_numeros[0:puntoCruza]
-        #cruzamos inviduo 1 con 2
-        nuevo_individuo_1_nombres =  valor_mantiene_1_nombres + guardar_cruza_2_nombres
-        nuevo_individuo_1_numeros =  valor_mantiene_1_numeros + guardar_cruza_2_numeros
+        valor_mantiene_2_nombres = individuo_cruzar_2_nombres[0:puntoCruza]
+        valor_mantiene_2_numeros = individuo_cruzar_2_numeros[0:puntoCruza]
+        valor_mantiene_2_cantidad = individuo_cruzar_2_cantidad[0:puntoCruza]
+        # cruzamos inviduo 1 con 2
+        nuevo_individuo_1_nombres = valor_mantiene_1_nombres + guardar_cruza_2_nombres
+        nuevo_individuo_1_numeros = valor_mantiene_1_numeros + guardar_cruza_2_numeros
+        nuevo_individuo_1_cantidad = valor_mantiene_1_cantidad + guardar_cruza_2_cantidad
         nombre_1 = primerRandom + segundoRandom
-        #cruzamos individuo 2 con 1
-        nuevo_individuo_2_nombres =  valor_mantiene_2_nombres + guardar_cruza_1_nombres
-        nuevo_individuo_2_numeros =  valor_mantiene_2_numeros + guardar_cruza_1_numeros
-        nombre_2 = segundoRandom + primerRandom 
-       
-        #creacion nuevos individuos cruzados AB
+        # cruzamos individuo 2 con 1
+        nuevo_individuo_2_nombres = valor_mantiene_2_nombres + guardar_cruza_1_nombres
+        nuevo_individuo_2_numeros = valor_mantiene_2_numeros + guardar_cruza_1_numeros
+        nuevo_individuo_2_cantidad = valor_mantiene_2_cantidad + guardar_cruza_1_cantidad
+        nombre_2 = segundoRandom + primerRandom
+
+        # creacion nuevos individuos cruzados AB
         indiv1 = Individuo()
-        indiv1.individuo_cruzado(nuevo_individuo_1_nombres,nuevo_individuo_1_numeros)
+        indiv1.individuo_cruzado(
+            nuevo_individuo_1_nombres, nuevo_individuo_1_numeros, nuevo_individuo_1_cantidad)
         indiv1.completarIndividuo(caloriasMaximasConsumir)
         listaTotalIndividuos[nombre_1] = indiv1
-        #creacion nuevos individuos cruzados BA
-        indiv2 =  Individuo()
-        indiv2.individuo_cruzado(nuevo_individuo_2_nombres,nuevo_individuo_2_numeros)
+        # creacion nuevos individuos cruzados BA
+        indiv2 = Individuo()
+        indiv2.individuo_cruzado(
+            nuevo_individuo_2_nombres, nuevo_individuo_2_numeros, nuevo_individuo_2_cantidad)
         indiv2.completarIndividuo(caloriasMaximasConsumir)
         listaTotalIndividuos[nombre_2] = indiv2
 
@@ -187,10 +262,6 @@ def cruza():
         lista_letras_individuos.append(nombre_2)
 
     aux_letras.clear()
-    
-
-
-        
 
 
 def eliminar_letra(dato_eliminar):
@@ -198,118 +269,90 @@ def eliminar_letra(dato_eliminar):
     for i in lista_letras_individuos:
         if i == dato_eliminar:
             listaPosiciones_eliminar.append(i)
-    print('lista Valores: ',listaPosiciones_eliminar)
-    if len(listaPosiciones_eliminar) >0:
+    # print('lista Valores: ',listaPosiciones_eliminar)
+    if len(listaPosiciones_eliminar) > 0:
         for borrar in listaPosiciones_eliminar:
-                lista_letras_individuos.remove(borrar)
-           
+            lista_letras_individuos.remove(borrar)
+
     listaPosiciones_eliminar = []
-            
+
 
 def mutacion():
-    
-    
+
     listaEliminar = []
     for indi in listaTotalIndividuos.items():
 
-        randomIndiv = random.uniform(0,1)
-    
+        randomIndiv = random.uniform(0, 1)
+
         if(randomIndiv <= probabilidadMutacion):
             # print('INDIVIDUAL***************')
             # print(indi[0])
             # print('random Individual: ',randomIndiv)
             # print('random probmutacion: ',probabilidadMutacion)
-            for i in range(0,9):
-                randomGen = random.uniform(0,1)
+            for i in range(0, 9):
+                randomGen = random.uniform(0, 1)
                 if randomGen <= probabilidadMutacionGen:
                     # print('GEN************')
                     # print('random GEN: ',randomGen)
                     # print('random prob Gen: ',probabilidadMutacionGen)
                     # print('Voy a mutar por gen', i )
                     bandera = False
-                    alimento_borrar = indi[1].alimentosDieta[i] 
-                    # alimento_borrar_valor = indi[1].alimentosDieta_valor[i] 
+                    alimento_borrar = indi[1].alimentosDieta[i]
+                    # alimento_borrar_valor = indi[1].alimentosDieta_valor[i]
                     while bandera == False:
-                        alimentoCambiar = random.choice(lista_alimentos_mutacion)
+                        alimentoCambiar = random.choice(
+                            lista_alimentos_mutacion)
                         alimentoCambiar_Valor = alimentosTotal[alimentoCambiar]
+
                         if alimento_borrar != alimentoCambiar:
-                            bandera =True
-                    cantidad =  random.randint(100,250)
+                            bandera = True
+                    cantidad = random.randint(100, 300)
                     indi[1].alimentosDieta[i] = alimentoCambiar
-                    indi[1].alimentosDieta_valor[i] = (alimentoCambiar_Valor * cantidad) / 100
+                    indi[1].alimentosDieta_valor[i] = (
+                        alimentoCambiar_Valor * cantidad) / 100
+                    indi[1].alimentosDieta_cantidad[i] = cantidad
 
             indi[1].individuo_mutacion_completar(caloriasMaximasConsumir)
-        if indi[1].i_caloriasDieta > caloriasMaximasConsumir or indi[1].i_caloriasDieta < 2000:
-      
-            listaEliminar.append(indi[0])
-            # print('Se eliminarn: ',indi[0])
-            
-   
+        if individual_genero == 'Hombre':
+            if indi[1].i_caloriasDieta > caloriasMaximasConsumir or indi[1].i_caloriasDieta < 2000:
+                listaEliminar.append(indi[0])
+        elif individual_genero == 'Mujer':
+            if indi[1].i_caloriasDieta > caloriasMaximasConsumir or indi[1].i_caloriasDieta < 1800:
+                listaEliminar.append(indi[0])
+
     if len(listaEliminar) > 0:
-        print('lista elimanr: ',listaEliminar)
-        for  nombre_eliminar1 in listaEliminar:
-            print('valor eliminar: ',nombre_eliminar1)
-            print('Total Nombre : ',lista_letras_individuos)
+        # print('lista elimanr: ',listaEliminar)
+        for nombre_eliminar1 in listaEliminar:
+            # print('valor eliminar: ',nombre_eliminar1)
+            # print('Total Nombre : ',lista_letras_individuos)
             listaTotalIndividuos.pop(nombre_eliminar1)
-            
-
-
-            # lista_letras_individuos.remove(nombre)
-            # segundaVeS = nombre in lista_letras_individuos
-            # if segundaVeS == True:
-            #     lista_letras_individuos.remove(nombre)
-
-            # del lista_letras_individuos[lista_letras_individuos.index(nombre_eliminar1)] 
-            # repetido = nombre_eliminar1 in lista_letras_individuos
-         
-            # if repetido == True:
-            #     del lista_letras_individuos[lista_letras_individuos.index(nombre_eliminar1)] 
-            # lista_letras_individuos.remove(nombre)
 
             eliminar_letra(nombre_eliminar1)
-            print('Total Nombre Despues: ',lista_letras_individuos)
+            # print('Total Nombre Despues: ',lista_letras_individuos)
 
-            
 
-    
-
-                         
 def poda():
     aptitudes_indi = {}
     peoresAptitudes = []
     for aptitud in listaTotalIndividuos.items():
         aptitudes_indi[aptitud[0]] = aptitud[1].aptitud
-    
-    
 
-    aptitudes_sort = sorted(aptitudes_indi.items(),key=operator.itemgetter(1),reverse=True)
+    aptitudes_sort = sorted(aptitudes_indi.items(),
+                            key=operator.itemgetter(1), reverse=True)
     contador = 0
     for name in enumerate(aptitudes_sort):
-        
+
         # print(name[1][0])
         if contador > poblacionMaxima-1:
             peoresAptitudes.append(name[1][0])
         contador = contador + 1
-    
+
     if len(peoresAptitudes) > 0:
         for nombre_eliminar2 in peoresAptitudes:
             listaTotalIndividuos.pop(nombre_eliminar2)
-            # for a in range(len(lista_letras_individuos)-1):
-            #     if lista_letras_individuos[a] == nombre:
-            #         lista_letras_individuos.pop(a)
-            # del lista_letras_individuos[lista_letras_individuos.index(nombre)] 
-            # repetido = nombre in lista_letras_individuos
-         
-            # if repetido == True:
-            #     del lista_letras_individuos[lista_letras_individuos.index(nombre)] 
-            # lista_letras_individuos.remove(nombre)
+
             eliminar_letra(nombre_eliminar2)
-            
 
-
-
-
-                    
 
 def eleccionAlimento():
     for alimento in alimentosTotal.items():
@@ -325,12 +368,13 @@ def eleccionAlimento():
 # mutacion()
 # poda()
 
+
 def main():
 
     eleccionAlimento()
     primerosIndividuos()
-    for i in range(5):
-      
+    for i in range(generaciones):
+
         ejecutarGeneracion = False
         while(ejecutarGeneracion == False):
             # print(lista_letras_individuos)
@@ -338,21 +382,48 @@ def main():
             cruza()
             mutacion()
 
-            if(len(listaTotalIndividuos) == 30):
+            if(len(listaTotalIndividuos) == poblacionMaxima):
                 ejecutarGeneracion = True
-            elif (len(listaTotalIndividuos) > 30):
-                print('entre a podar')
+            elif (len(listaTotalIndividuos) > poblacionMaxima):
+                # print('entre a podar')
                 ejecutarGeneracion = True
                 poda()
-            
-  
-    for indi in listaTotalIndividuos.items():
-        print(indi[0])
+
+    aptitudes_indi_final = {}
+    for aptitud in listaTotalIndividuos.items():
+        aptitudes_indi_final[aptitud[0]] = aptitud[1].aptitud
+
+    aptitudes_sort = sorted(aptitudes_indi_final.items(),
+                            key=operator.itemgetter(1), reverse=True)
+
+    for name in enumerate(aptitudes_sort):
+        individuos_finales_ordenados[name[1][0]
+                                     ] = listaTotalIndividuos[name[1][0]]
+        # print(name[1][0])
+    Suma_total_pesos = 0
+    suma_total_calorias_reducir = 0
+    for indi in individuos_finales_ordenados.items():
+        # print(indi[0])
         print(indi[1].toString())
-        print("______________________________________________S")
-        print(len(listaTotalIndividuos))
+        Suma_total_pesos = Suma_total_pesos + indi[1].aptitud
+        suma_total_calorias_reducir = suma_total_calorias_reducir + \
+            indi[1].fenotipo
+        print("______________________________________________ Final")
+
+    print('Total a bajar:', Suma_total_pesos)
+    print("Total de calorias reducidas", suma_total_calorias_reducir)
+
 main()
-print(caloriasMaximasConsumir)
-# lista = ['ab','ab','a']
-# lista.remove('ab')
-# print(lista)
+datos = []
+contador = 0
+for valor in individuos_finales_ordenados.items():
+    if contador < 9:
+        datos.append(valor[1].alimentosDieta)
+        datos.append(valor[1].alimentosDieta_cantidad)
+    contador = contador + 1
+
+
+# app = QApplication(sys.argv)
+# dialogo = Dialogo()
+# dialogo.show()
+# sys.exit(app.exec())

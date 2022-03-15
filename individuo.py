@@ -28,6 +28,7 @@ class Individuo():
 
         self.alimentosDieta = []
         self.alimentosDieta_valor = []
+        self.alimentosDieta_cantidad = []
         
         self.i_caloriasDieta = 0
         self.fenotipo = 0
@@ -64,9 +65,11 @@ class Individuo():
             valorDelAlimento = self.alimentosConsumir[nombreAlimentosConsumir[seleccionAlimentos]]
             #se guarda el alimento dentro de la dieta 
             cantidadCaolorias = (valorDelAlimento * cantidad) / 100
+
             # self.alimentosDieta[nombreAlimentosConsumir[seleccionAlimentos]] = cantidadCaolorias
             self.alimentosDieta.append(nombreAlimentosConsumir[seleccionAlimentos])
             self.alimentosDieta_valor.append(cantidadCaolorias)
+            self.alimentosDieta_cantidad.append(cantidad)
             self.i_caloriasDieta = self.i_caloriasDieta + cantidadCaolorias
         
         
@@ -80,9 +83,10 @@ class Individuo():
 
 
 
-    def individuo_cruzado(self,listaNombres_datos,listavalores_datos):
+    def individuo_cruzado(self,listaNombres_datos,listavalores_datos,listaCantidad_datos):
         self.alimentosDieta = listaNombres_datos
         self.alimentosDieta_valor = listavalores_datos
+        self.alimentosDieta_cantidad = listaCantidad_datos
         # print(self.alimentosDieta_valor)
         self.i_caloriasDieta = sum(self.alimentosDieta_valor)
         
@@ -98,7 +102,7 @@ class Individuo():
 
 
     def toString(self):
-        return  f'alimentos: {self.alimentosDieta}\n'+f'alimentos_valores: {self.alimentosDieta_valor}\n'+f'i calorias: {self.i_caloriasDieta}\n'+f'fenotipo: {self.fenotipo}\n'+f'Aptitud: {self.aptitud}'  
+        return  f'alimentos: {self.alimentosDieta}\n'+f'alimentos_valores: {self.alimentosDieta_valor}\n'+f'cantidad: {self.alimentosDieta_cantidad}\n'+f'i calorias: {self.i_caloriasDieta}\n'+f'fenotipo: {self.fenotipo}\n'+f'Aptitud: {self.aptitud}'  
 
 
     
